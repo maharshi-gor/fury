@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from functools import reduce
+from warnings import warn
 
 from PIL.Image import fromarray as image_from_array
 import numpy as np
@@ -41,10 +42,10 @@ class Scene(GfxScene):
         background : tuple, optional
             Uniform color to show in the background of scene, by default (0, 0, 0, 1)
         skybox : Texture, optional
-            PyGfx Texture object, by default None
+            PyGfx Texture object
         lights : list, optional
             list of Light objects to add to the scene. If not passed AmbientLight is
-            added to the scene, by default None
+            added to the scene
         """
         super().__init__()
 
@@ -189,17 +190,14 @@ def create_screen(
     renderer : Renderer
         PyGfx Renderer object to hold the viewport of the screen
     rect : tuple, optional
-        Bounding box of (x, y, w, h), by default None
+        Bounding box of (x, y, w, h)
     scene : Scene, optional
-        scene graph of the screen. If None, a new scene is created, by default None
-    camera : Camera, optional
-        PyGfx camera of choice to visualize. If None, Perspective Camera is used, by
-        default None
+        scene graph of the screen. If None, a new scene is created
+        PyGfx camera of choice to visualize. If None, Perspective Camera is used
     controller : Controller, optional
-        PyGfx Controller of choice to visualize. If None, Orbit Controller is used, by
-        default None
+        PyGfx Controller of choice to visualize. If None, Orbit Controller is used
     camera_light : bool, optional
-        If True a directional light is attached on top of the camera, by default True
+        If True a directional light is attached on top of the camera
 
     Returns
     -------
@@ -328,8 +326,8 @@ class ShowManager:
         controller=None,
         title="FURY 2.0",
         size=(800, 800),
-        blend_mode="weighted_plus",
-        window_type="auto",
+        blend_mode="default",
+        window_type="default",
         pixel_ratio=1,
         camera_light=True,
         screen_config=None,
@@ -342,51 +340,49 @@ class ShowManager:
         Parameters
         ----------
         renderer : Renderer, optional
-            PyGfx Renderer object. If None, a new Renderer object is created,
-            by default None
+            PyGfx Renderer object. If None, a new Renderer object is created
         scene : Scene or list, optional
             If scene is passed same scene is applied to all the screens.
             Else each scene is provided to respective screen from the list.
-            If None, a new scene object is created, by default None
+            If None, a new scene object is created.
         camera : Camera or list, optional
             If camera is passed same camera is applied to all the screens.
             Else each camera is provided to respective screen from the list.
-            If None, a new camera object is created, by default None
+            If None, a new camera object is created.
         controller : Controller or list, optional
             If controller is passed same controller is applied to all the screens.
             Else each controller is provided to respective screen from the list.
-            If None, a new controller object is created, by default None
+            If None, a new controller object is created.
         title : str, optional
-            Title of the window, by default "FURY 2.0"
+            Title of the window.
         size : tuple, optional
-            Size of the window, by default (800, 800)
+            Size of the window.
         blend_mode : str, optional
             Renderer blend mode. One of the following blend mode is accepted
-            * "additive": single-pass approach that adds fragments together.
-            * "opaque": single-pass approach that ignores transparency.
-            * "ordered1": single-pass approach that blends fragments (using alpha
+            - additive or default : single-pass approach that adds fragments together.
+            - opaque : single-pass approach that ignores transparency.
+            - ordered1 : single-pass approach that blends fragments (using alpha
             blending). Can only produce correct results if fragments are drawn
             from back to front.
-            * "ordered2": two-pass approach that first processes all opaque
+            - ordered2 : two-pass approach that first processes all opaque
             fragments and then blends transparent fragments (using alpha blending)
             with depth-write disabled. The visual results are usually better than
             ordered1, but still depend on the drawing order.
-            * "weighted": two-pass approach for order independent transparency based
+            - weighted : two-pass approach for order independent transparency based
             on alpha weights.
-            * "weighted_depth": two-pass approach for order independent transparency
+            - weighted_depth : two-pass approach for order independent transparency
             based on alpha weights and depth [1]. Note that the depth range
             affects the (quality of the) visual result.
-            * "weighted_plus": three-pass approach for order independent
+            - weighted_plus : three-pass approach for order independent
             transparency, in which the front-most transparent layer is rendered
             correctly, while transparent layers behind it are blended using alpha
-            weights, by default "weighted_plus"
+            weights.
         window_type : str, optional
             Type of the window. One of the following window type is accepted
-            *auto or glfw: select default GLFW canvas window.
-            *qt: select Qt canvas window.
-            *jupyter: select jupyter_rfb canvas widget.
-            *offscreen: select offscreen canvas to not show any window for remote runs,
-            by default "auto"
+            - glfw or default: select default GLFW canvas window.
+            - qt: select Qt canvas window.
+            - jupyter: select jupyter_rfb canvas widget.
+            - offscreen: select offscreen canvas to not show any window for remote runs.
         pixel_ratio : float, optional
             The ratio between the number of pixels in the render buffer versus the
             number of pixels in the display buffer. If None, this will be 1 for high-res
@@ -394,19 +390,18 @@ class ShowManager:
             anti-aliasing) is applied while converting a render buffer to a display
             buffer. If smaller than 1, pixels from the render buffer are replicated
             while converting to a display buffer. This has positive performance
-            implications., by default 1
+            implications.
         camera_light : bool, optional
-            To attach a light on top of camera, by default True
+            To attach a light on top of camera
         screen_config : list, optional
             List of all the vertical and horizontal section or list of all the bounding
-            boxes of the screens. If None, single screen is assumed, by default None
+            boxes of the screens. If None, single screen is assumed.
         enable_events : bool, optional
-            Enable the events from mouse and keyboard on the visualization
-            , by default True
+            Enable the events from mouse and keyboard on the visualization.
         qt_app : QApplication, optional
-            QtWidgets QApplication object for QtCanvas, by default None
+            QtWidgets QApplication object for QtCanvas.
         qt_parent : QWidget, optional
-            QWidget object for putting the window in a QLayout, by default None
+            QWidget object for putting the window in a QLayout.
         """
         self.size = size
         self._title = title
@@ -472,13 +467,22 @@ class ShowManager:
         ----------
         window_type : str
             Type of the window. One of the following window type is accepted
-            *auto or glfw: select default GLFW canvas window.
-            *qt: select Qt canvas window.
-            *jupyter: select jupyter_rfb canvas widget.
-            *offscreen: select offscreen canvas to not show any window for remote runs.
+            - glfw or default : select default GLFW canvas window.
+            - qt : select Qt canvas window.
+            - jupyter : select jupyter_rfb canvas widget.
+            - offscreen : select offscreen canvas to not show any window for remote runs.
         """
         window_type = window_type.lower()
-        if window_type == "auto" or window_type == "glfw":
+
+        if window_type not in ["default", "glfw", "qt", "jupyter", "offscreen"]:
+            raise ValueError(
+                "Invalid window_type: {}. "
+                "Valid values are default, glfw, qt, jupyter, offscreen".format(
+                    window_type
+                )
+            )
+
+        if window_type == "default" or window_type == "glfw":
             self.window = Canvas(size=self.size, title=self._title)
         elif window_type == "qt":
             if self._qt_app is None:
@@ -489,10 +493,8 @@ class ShowManager:
             self._is_qt = True
         elif window_type == "jupyter":
             self.window = JupyterCanvas(size=self.size, title=self._title)
-        elif window_type == "offscreen":
-            self.window = OffscreenCanvas(size=self.size, title=self._title)
         else:
-            self.window = Canvas(size=self.size, title=self._title)
+            self.window = OffscreenCanvas(size=self.size, title=self._title)
 
     def _calculate_total_screens(self):
         """Calculate the total screens from the screen configurations."""
@@ -649,18 +651,16 @@ def snapshot(
     Parameters
     ----------
     scene : Scene or list, optional
-        scene(s) graph to capture the image, by default None
+        scene(s) graph to capture the image.
     screen_config : list, optional
         List of all the vertical and horizontal section or list of all the bounding
-        boxes of the screens. If None, single screen is assumed, by default None
+        boxes of the screens. If None, single screen is assumed.
     fname : str, optional
-        Name or path of the output image file, by default "output.png"
+        Name or path of the output image file.
     actors : Object, optional
-        PyGfx Objects to show on the scene. Works with single scene configuration,
-        by default None
+        PyGfx Objects to show on the scene. Works with single scene configuration.
     return_array : bool, optional
-        If True, return the numpy array of the image, by default False
-
+        If True, return the numpy array of the image.
     Returns
     -------
     narray
@@ -681,7 +681,7 @@ def snapshot(
         return arr
 
 
-def display(actors, *, window_type="auto"):
+def display(actors, *, window_type="default"):
     """Display given actors in a fury window. A Quick way to visualize the actors.
 
     Parameters
@@ -690,11 +690,10 @@ def display(actors, *, window_type="auto"):
         PyGfx Object
     window_type : str, optional
         Type of the window. One of the following window type is accepted
-        *auto or glfw: select default GLFW canvas window.
-        *qt: select Qt canvas window.
-        *jupyter: select jupyter_rfb canvas widget.
-        *offscreen: select offscreen canvas to not show any window for remote runs,
-        by default "auto"
+        - glfw or default : select default GLFW canvas window.
+        - qt : select Qt canvas window.
+        - jupyter : select jupyter_rfb canvas widget.
+        - offscreen : select offscreen canvas to not show any window for remote runs.
     """
     scene = Scene()
     scene.add(*actors)
