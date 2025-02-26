@@ -227,7 +227,8 @@ def create_screen(
 
 
 def update_camera(camera, size, target):
-    """Updates the camera to face the target.
+    """Updates the camera to face the target. The size will be used when the target is
+    an empty scene.
 
     Parameters
     ----------
@@ -238,13 +239,14 @@ def update_camera(camera, size, target):
     target : Object
         PyGfx Object to show on camera.
     """
-    camera.width = size[0]
-    camera.height = size[1]
 
     if (isinstance(target, Scene) and len(target.children) > 3) or not isinstance(
         target, Scene
     ):
         camera.show_object(target)
+    else:
+        camera.width = size[0]
+        camera.height = size[1]
 
 
 def update_viewports(screens, screen_bbs):
@@ -407,7 +409,7 @@ class ShowManager:
         qt_parent : QWidget, optional
             QWidget object for putting the window in a QLayout.
         """
-        self.size = size
+        self._size = size
         self._title = title
         self._is_qt = False
         self._qt_app = qt_app
@@ -419,7 +421,7 @@ class ShowManager:
         self.renderer = renderer
         self.renderer.pixel_ratio = pixel_ratio
         self.renderer.blend_mode = blend_mode
-        self.renderer.add_event_handler(self.resize, "resize")
+        self.renderer.add_event_handler(self._resize, "resize")
 
         self._total_screens = 0
         self._screen_config = screen_config
@@ -432,10 +434,6 @@ class ShowManager:
         )
 
         self.enable_events = enable_events
-
-        self.timers = []
-        self._fps = 0
-        self._last_render_time = 0
 
     def _screen_setup(self, scene, camera, controller, camera_light):
         """Setup to create the screens.
@@ -487,18 +485,18 @@ class ShowManager:
             )
 
         if window_type == "default" or window_type == "glfw":
-            self.window = Canvas(size=self.size, title=self._title)
+            self.window = Canvas(size=self._size, title=self._title)
         elif window_type == "qt":
             if self._qt_app is None:
                 self._qt_app = QtWidgets.QApplication([])
             self.window = QtCanvas(
-                size=self.size, title=self._title, parent=self._qt_parent
+                size=self._size, title=self._title, parent=self._qt_parent
             )
             self._is_qt = True
         elif window_type == "jupyter":
-            self.window = JupyterCanvas(size=self.size, title=self._title)
+            self.window = JupyterCanvas(size=self._size, title=self._title)
         else:
-            self.window = OffscreenCanvas(size=self.size, title=self._title)
+            self.window = OffscreenCanvas(size=self._size, title=self._title)
 
     def _calculate_total_screens(self):
         """Calculate the total screens from the screen configurations."""
@@ -529,6 +527,20 @@ class ShowManager:
                 )
             )
         return screens
+
+    def _resize(self, _event):
+        """Resize the inner screens based on the event on the window.
+
+        Parameters
+        ----------
+        _event : Event
+            PyGfx Event object for window.
+        """
+        update_viewports(
+            self.screens,
+            calculate_screen_sizes(self._screen_config, self.renderer.logical_size),
+        )
+        self.render()
 
     @property
     def app(self):
@@ -582,6 +594,17 @@ class ShowManager:
         """
         self.renderer.pixel_ratio = value
 
+    @property
+    def size(self):
+        """Size of the window.
+
+        Returns
+        -------
+        tuple
+            (w, h) of the window.
+        """
+        return self._size
+
     def set_enable_events(self, value):
         """Enable or disables the events on the rendering window.
 
@@ -589,7 +612,7 @@ class ShowManager:
         ----------
         value : bool
         """
-        self._enable_events = value
+        self.enable_events = value
         if value:
             self.renderer.enable_events()
         else:
@@ -626,20 +649,6 @@ class ShowManager:
             self._qt_app.exec()
         else:
             run()
-
-    def resize(self, _event):
-        """Resize the inner screens based on the event on the window.
-
-        Parameters
-        ----------
-        _event : Event
-            PyGfx Event object for window.
-        """
-        update_viewports(
-            self.screens,
-            calculate_screen_sizes(self._screen_config, self.renderer.logical_size),
-        )
-        self.render()
 
 
 def snapshot(
