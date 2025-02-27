@@ -297,7 +297,7 @@ def calculate_screen_sizes(screens, size):
     list
         list of bounding box of each screen.
     """
-    if screens is None:
+    if screens is None or not screens:
         return [(0, 0, *size)]
 
     screen_bbs = []
@@ -414,6 +414,7 @@ class ShowManager:
         self._is_qt = False
         self._qt_app = qt_app
         self._qt_parent = qt_parent
+        self._window_type = window_type
         self._setup_window(window_type)
 
         if renderer is None:
@@ -500,7 +501,7 @@ class ShowManager:
 
     def _calculate_total_screens(self):
         """Calculate the total screens from the screen configurations."""
-        if self._screen_config is None:
+        if self._screen_config is None or not self._screen_config:
             self._total_screens = 1
         elif isinstance(self._screen_config[0], int):
             self._total_screens = reduce(lambda a, b: a + b, self._screen_config)
@@ -622,6 +623,7 @@ class ShowManager:
 
     def snapshot(self, fname):
         """Save a copy of the rasterized image of the scene(s).
+        The window_type needs to be offscreen for snapshot to work.
 
         Parameters
         ----------
@@ -633,6 +635,15 @@ class ShowManager:
         narray
             numpy array of the image.
         """
+        if self._window_type != "offscreen":
+            raise ValueError(
+                "Invalid window_type: {}. "
+                "Snapshot functionality is only allowed on offscreen".format(
+                    self._window_type
+                )
+            )
+        self.render()
+        self.window.draw()
         arr = np.asarray(self.renderer.snapshot())
         img = image_from_array(arr)
         img.save(fname)
@@ -686,15 +697,13 @@ def snapshot(
     show_m = ShowManager(
         scene=scene, screen_config=screen_config, window_type="offscreen"
     )
-    show_m.render()
-    show_m.window.draw()
     arr = show_m.snapshot(fname)
 
     if return_array:
         return arr
 
 
-def display(actors, *, window_type="default"):
+def show(actors, *, window_type="default"):
     """Display given actors in a fury window. A Quick way to visualize the actors.
 
     Parameters
@@ -712,70 +721,3 @@ def display(actors, *, window_type="default"):
     scene.add(*actors)
     show_m = ShowManager(scene=scene, window_type=window_type)
     show_m.start()
-
-
-def analyze_snapshot(im, *, colors=None, find_objects=True, strel=None):
-    """Analyze snapshot from memory or file.
-
-    Parameters
-    ----------
-    im: str or array
-        If string then the image is read from a file otherwise the image is
-        read from a numpy array. The array is expected to be of shape (X, Y, 3)
-        or (X, Y, 4) where the last dimensions are the RGB or RGBA values.
-    colors: tuple (3,) or list of tuples (3,)
-        List of colors to search in the image
-    find_objects: bool
-        If True it will calculate the number of objects that are different
-        from the background and return their position in a new image.
-    strel: 2d array
-        Structure element to use for finding the objects.
-
-    Returns
-    -------
-    report : ReportSnapshot
-        This is an object with attributes like ``colors_found`` that give
-        information about what was found in the current snapshot array ``im``.
-
-    """
-    if isinstance(im, str):
-        im = load_image(im)
-
-    class ReportSnapshot:
-        objects = None
-        labels = None
-        colors_found = False
-
-        def __str__(self):
-            msg = "Report:\n-------\n"
-            msg += "objects: {}\n".format(self.objects)
-            msg += "labels: \n{}\n".format(self.labels)
-            msg += "colors_found: {}\n".format(self.colors_found)
-            return msg
-
-    report = ReportSnapshot()
-
-    if colors is not None:
-        if isinstance(colors, tuple):
-            colors = [colors]
-        flags = [False] * len(colors)
-        for i, col in enumerate(colors):
-            # find if the current color exist in the array
-            flags[i] = np.any(np.any(np.all(np.equal(im[..., :3], col[:3]), axis=-1)))
-
-        report.colors_found = flags
-
-    if find_objects is True:
-        weights = [0.299, 0.587, 0.144]
-        gray = np.dot(im[..., :3], weights)
-        bg_color2 = im[0, 0]
-        background = np.dot(bg_color2, weights)
-
-        if strel is None:
-            strel = np.array([[1, 1, 1], [1, 1, 1], [1, 1, 1]])
-
-        labels, objects = ndimage.label(gray != background, strel)
-        report.labels = labels
-        report.objects = objects
-
-    return report

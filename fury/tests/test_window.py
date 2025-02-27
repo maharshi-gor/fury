@@ -2,6 +2,7 @@ import numpy as np
 import pytest
 
 from fury.actor import sphere
+from fury.io import load_image
 from fury.lib import (
     AmbientLight,
     DirectionalLight,
@@ -10,6 +11,7 @@ from fury.lib import (
     PerspectiveCamera,
     Renderer,
     Texture,
+    have_jupyter_rfb,
     have_py_qt5,
     have_py_qt6,
     have_py_side6,
@@ -19,6 +21,7 @@ from fury.window import (
     ShowManager,
     calculate_screen_sizes,
     create_screen,
+    show,
     update_camera,
     update_viewports,
 )
@@ -245,3 +248,63 @@ def test_show_manager_update_camera(sample_actor):
     update_camera(show_m.screens[0].camera, show_m.size, scene)
     assert show_m.screens[0].camera.width != 800
     assert show_m.screens[0].camera.height != 800
+
+
+def test_show_manager_snapshot(tmpdir):
+    """Test taking a snapshot of the scene."""
+    show_m = ShowManager()
+    fname = tmpdir.join("snapshot.png")
+    with pytest.raises(ValueError):
+        arr = show_m.snapshot(str(fname))
+
+    show_m = ShowManager(window_type="offscreen")
+    arr = show_m.snapshot(str(fname))
+
+    saved_arr = load_image(str(fname))
+
+    assert isinstance(arr, np.ndarray)
+    assert arr.shape[2] == 4  # RGBA image
+    np.testing.assert_equal(arr, saved_arr)
+
+
+def test_show_manager_snapshot_multiple_screens(tmpdir):
+    """Test taking a snapshot with multiple screens."""
+    show_m = ShowManager(screen_config=[2], window_type="offscreen")  # Two screens
+    fname = tmpdir.join("snapshot_multiple.png")
+    arr = show_m.snapshot(str(fname))
+    saved_arr = load_image(str(fname))
+    assert isinstance(arr, np.ndarray)
+    assert arr.shape[2] == 4  # RGBA image
+    np.testing.assert_equal(arr, saved_arr)
+
+
+def test_show_manager_invalid_window_type():
+    """Test initialization with an invalid window type."""
+    with pytest.raises(ValueError):
+        ShowManager(window_type="invalid")
+
+
+def test_show_manager_empty_scene():
+    """Test initialization with an empty scene."""
+    show_m = ShowManager(scene=Scene())
+    assert (
+        len(show_m.screens[0].scene.children) == 3
+    )  # Background + AmbientLight + Camera
+
+
+def test_show_manager_with_empty_config():
+    """Test initialization with empty screen config."""
+    show_m = ShowManager(screen_config=[])
+    assert show_m._total_screens == 1
+    assert len(show_m.screens) == 1
+
+
+def test_display_default(sample_actor):
+    """Test the display function with default parameters."""
+    show([sample_actor], window_type="offscreen")  # No window shown
+
+
+@pytest.mark.skipif(not have_jupyter_rfb, reason="Needs jupyter-rfb")
+def test_display_custom_window(sample_actor):
+    """Test the display function with a custom window type."""
+    show([sample_actor], window_type="jupyter")  # Jupyter canvas
