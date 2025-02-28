@@ -719,4 +719,5 @@ def show(actors, *, window_type="default"):
     scene = Scene()
     scene.add(*actors)
     show_m = ShowManager(scene=scene, window_type=window_type)
-    show_m.start()
+    if window_type != "offscreen":
+        show_m.start()
