@@ -165,6 +165,13 @@ def test_show_manager_initialization_custom_scene_camera():
     assert show_m.screens[0].camera == camera
 
 
+def test_show_manager_initialization_default_window():
+    """Test ShowManager initialization with a Qt window."""
+    show_m = ShowManager()
+    assert show_m._is_qt is False
+    assert show_m.app is None
+
+
 @pytest.mark.skipif(
     not (have_py_side6 or have_py_qt6 or have_py_qt5), reason="Needs Qt"
 )
