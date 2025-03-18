@@ -12,7 +12,7 @@ jupyter_pckg_msg = (
 )
 
 jupyter_rfb, have_jupyter_rfb, _ = optional_package(
-    "jupyter-rfb", trip_msg=jupyter_pckg_msg
+    "jupyter_rfb", trip_msg=jupyter_pckg_msg
 )
 if have_jupyter_rfb:
     from wgpu.gui.jupyter import WgpuCanvas as JupyterWgpuCanvas
@@ -52,7 +52,9 @@ Viewport: TypeAlias = gfx.Viewport
 
 DirectionalLight = gfx.DirectionalLight
 OrbitController = gfx.OrbitController
+PanZoomController = gfx.PanZoomController
 PerspectiveCamera = gfx.PerspectiveCamera
+OrthographicCamera = gfx.OrthographicCamera
 Renderer = gfx.WgpuRenderer
 run = run
 Canvas = WgpuCanvas

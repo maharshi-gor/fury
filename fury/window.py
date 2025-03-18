@@ -218,6 +218,8 @@ def create_screen(
 
     if controller is None:
         controller = OrbitController(camera, register_events=vp)
+    else:
+        controller.register_events(vp)
 
     screen = Screen(vp, scene, camera, controller)
     update_camera(camera, screen.size, scene)
