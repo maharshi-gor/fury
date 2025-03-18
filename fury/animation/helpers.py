@@ -1,9 +1,6 @@
 import numpy as np
 
-from fury.decorators import warn_on_args_to_kwargs
 
-
-@warn_on_args_to_kwargs()
 def get_previous_timestamp(timestamps, current_time, *, include_last=False):
     """Return the maximum previous timestamp of a given time.
 
@@ -29,7 +26,6 @@ def get_previous_timestamp(timestamps, current_time, *, include_last=False):
     return timestamps[0]
 
 
-@warn_on_args_to_kwargs()
 def get_next_timestamp(timestamps, current_time, *, include_first=False):
     """Return the minimum next timestamp of a given time.
 

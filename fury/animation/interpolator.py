@@ -27,6 +27,9 @@ def spline_interpolator(keyframes, degree):
         curve. Data should be on the following format:
         {1: {'value': np.array([...])}, 2: {'value': np.array([...])}}
 
+    degree: int
+        The degree of the spline to be used. The degree must be between 1 and 5.
+
     Returns
     -------
     function

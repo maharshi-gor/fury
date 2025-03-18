@@ -1,20 +1,22 @@
 from collections import defaultdict
 from time import perf_counter
 from warnings import warn
+from pygfx import Mesh, Group
+
+import pygfx as gfx
 
 import numpy as np
 from scipy.spatial import transform
 
 from fury import utils
 from fury.actor import line
-from fury.animation.interpolator import (  # noqa F401
+from fury.animation.interpolator import (
     linear_interpolator,
     slerp,
     spline_interpolator,
     step_interpolator,
 )
 from fury.decorators import warn_on_args_to_kwargs
-from fury.lib import Actor, Camera, Transform
 
 
 class Animation:
@@ -62,7 +64,7 @@ class Animation:
         self._added_to_scene = True
         self._motion_path_res = motion_path_res
         self._motion_path_actor = None
-        self._transform = Transform()
+        self._transform = gfx.utils.transform.AffineTransform()
         self._general_callbacks = []
         # Adding actors to the animation
         if actors is not None:
@@ -886,7 +888,7 @@ class Animation:
             for a in item:
                 self.add(a)
             return
-        elif isinstance(item, Actor):
+        elif isinstance(item, (Mesh, Group)):
             self.add_actor(item)
         elif isinstance(item, Animation):
             self.add_child_animation(item)
@@ -933,7 +935,7 @@ class Animation:
                 self._static_actors.append(actor)
         else:
             if actor not in self._actors:
-                actor.vcolors = utils.colors_from_actor(actor)
+                # actor.vcolors = utils.colors_from_actor(actor)
                 self._actors.append(actor)
 
     @property
@@ -1138,7 +1140,9 @@ class Animation:
         if isinstance(self._parent_animation, Animation):
             self._transform.DeepCopy(self._parent_animation._transform)
         else:
-            self._transform.Identity()
+            pass
+            # self._transform
+        # todo: check if this is necessary
 
         self._current_timestamp = time
 
@@ -1146,7 +1150,7 @@ class Animation:
         if in_scene:
             if self.is_interpolatable("position"):
                 position = self.get_position(time)
-                self._transform.Translate(*position)
+                self._transform.position = position
 
             if self.is_interpolatable("opacity"):
                 opacity = self.get_opacity(time)
@@ -1170,7 +1174,8 @@ class Animation:
                     utils.update_actor(act)
 
             # update actors' transformation matrix
-            [act.SetUserTransform(self._transform) for act in self.actors]
+            for act in self.actors:
+                act.local.position = self._transform.position
 
         for attrib in self._data:
             callbacks = self._data.get(attrib, {}).get("callbacks", [])
@@ -1239,7 +1244,7 @@ class CameraAnimation(Animation):
         self._camera = camera
 
     @property
-    def camera(self) -> Camera:
+    def camera(self):
         """Return the camera assigned to this animation.
 
         Returns
@@ -1251,7 +1256,7 @@ class CameraAnimation(Animation):
         return self._camera
 
     @camera.setter
-    def camera(self, camera: Camera):
+    def camera(self, camera):
         """Set a camera to be animated.
 
         Parameters
