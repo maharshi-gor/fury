@@ -1,4 +1,4 @@
-from pygfx import Geometry, Mesh
+from fury.lib import Geometry, Mesh
 
 
 def buffer_to_geometry(positions, **kwargs):

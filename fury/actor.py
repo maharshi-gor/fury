@@ -1,5 +1,8 @@
+from dipy.data import get_sphere
+from dipy.reconst.shm import sh_to_sf_matrix
 import numpy as np
 
+from fury.actors.odf import OdfSlicer, OdfSlicerMaterial
 from fury.geometry import buffer_to_geometry, create_mesh
 from fury.material import _create_mesh_material
 import fury.primitive as fp
@@ -441,3 +444,45 @@ def frustum(
         material=material,
         enable_picking=enable_picking,
     )
+
+
+def get_lmax_from_N(N):
+    sqrt_val = np.sqrt(8 * N + 1)
+    lmax = (sqrt_val - 3) / 2
+    assert lmax.is_integer(), f"N = {N} does not correspond to a valid l_max"
+    return int(lmax)
+
+
+def odf_slicer(odf_data, sphere="repulsion100"):
+    n_coeff = odf_data.shape[-1]
+    sh_order = get_lmax_from_N(n_coeff)
+    print(sh_order)
+    sphere_obj = get_sphere(name=sphere)
+
+    data_shape = odf_data.shape[:3]
+
+    res = fp.repeat_primitive(
+        sphere_obj.vertices,
+        sphere_obj.faces,
+        np.indices(data_shape).reshape(np.prod(data_shape), 3),
+    )
+    big_vertices, big_faces, big_colors, _ = res
+
+    geo = buffer_to_geometry(
+        indices=big_faces.astype("int32"),
+        positions=big_vertices.astype("float32"),
+        texcoords=big_vertices.astype("float32"),
+        normals=np.ones_like(big_vertices).astype("float32"),
+        colors=big_colors.astype("float32"),
+    )
+
+    mat = OdfSlicerMaterial(color_mode="vertex")
+
+    B_matrix = sh_to_sf_matrix(
+        sphere_obj, sh_order_max=sh_order, legacy=False, return_inv=False
+    )
+    odf_slicer = OdfSlicer(
+        geometry=geo, material=mat, B_matrix=B_matrix.T, data=odf_data
+    )
+
+    return odf_slicer
