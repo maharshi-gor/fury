@@ -578,6 +578,46 @@ def generate_planar_uvs(vertices, *, axis="xy"):
     return uvs
 
 
+def get_spherical_uvs(vertices, flip_v=False):
+    """Generate spherical UV coordinates from 3D vertices.
+
+    Parameters
+    ----------
+    vertices : ndarray, shape (N, 3)
+        Array of vertex coordinates in 3D space.
+    flip_v : bool, optional
+        Whether to flip the V coordinate.
+
+    Returns
+    -------
+    ndarray
+        Array of UV coordinates, shape (N, 2), where N is the number of vertices.
+    """
+
+    if vertices.ndim != 2 or vertices.shape[1] != 3 or vertices.shape[0] < 2:
+        raise ValueError("vertices must be a 2D array with shape (N, 3) with N > 2.")
+
+    norm = np.linalg.norm(vertices, axis=1, keepdims=True)
+    norm = np.where(norm == 0, 1.0, norm)
+    n = vertices / norm
+
+    nx = n[:, 0]
+    ny = n[:, 1]
+    nz = n[:, 2]
+
+    u = 0.5 + np.arctan2(ny, nx) / (2 * np.pi)
+
+    nz_clipped = np.clip(nz, -1.0, 1.0)
+    v = 0.5 - np.arcsin(nz_clipped) / np.pi
+
+    uvs = np.stack((u, v), axis=1)
+
+    if flip_v:
+        uvs[:, 1] = 1.0 - uvs[:, 1]
+
+    return uvs
+
+
 def create_sh_basis_matrix(vertices, l_max):
     """Create a SH basis matrix for real spherical harmonics.
 

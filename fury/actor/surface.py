@@ -72,7 +72,7 @@ def surface(
                 normals=normals.astype("float32") if normals is not None else None,
             )
             mat = _create_mesh_material(
-                material=material, mode="vertex", opacity=opacity
+                material=material, mode="vertex", opacity=opacity, flat_shading=False
             )
         elif isinstance(colors, (tuple, list)) and len(colors) == 3:
             geo = buffer_to_geometry(
@@ -80,7 +80,9 @@ def surface(
                 indices=faces.astype("int32"),
                 normals=normals.astype("float32") if normals is not None else None,
             )
-            mat = _create_mesh_material(color=colors, opacity=opacity)
+            mat = _create_mesh_material(
+                color=colors, opacity=opacity, flat_shading=False
+            )
         else:
             raise ValueError(
                 "Colors must be either an ndarray with shape (N, 3) or (N, 4), "
@@ -112,13 +114,19 @@ def surface(
             normals=normals.astype("float32") if normals is not None else None,
         )
         mat = _create_mesh_material(
-            material=material, texture=tex, opacity=opacity, mode="auto"
+            material=material,
+            texture=tex,
+            opacity=opacity,
+            mode="auto",
+            flat_shading=False,
         )
     else:
         geo = buffer_to_geometry(
             positions=vertices.astype("float32"), indices=faces.astype("int32")
         )
-        mat = _create_mesh_material(material=material, opacity=opacity)
+        mat = _create_mesh_material(
+            material=material, opacity=opacity, flat_shading=False
+        )
 
     obj = create_mesh(geo, mat)
     return obj
