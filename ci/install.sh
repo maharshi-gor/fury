@@ -1,5 +1,14 @@
 #!/bin/bash
 
+case "${INSTALL_TYPE:-}" in
+    pip|conda) ;;
+    *)
+        printf 'Unsupported INSTALL_TYPE: %s. Supported modes: pip, conda.\n' \
+            "${INSTALL_TYPE:-<unset>}" >&2
+        exit 1
+        ;;
+esac
+
 echo "Activate virtual environment"
 source ci/activate_env.sh
 
@@ -13,24 +22,6 @@ fi
 
 #---------- FURY Installation -----------------
 
-if [ "$INSTALL_TYPE" == "setup" ]; then
-    python setup.py install
-elif [ "$INSTALL_TYPE" == "pip" ]; then
-    $PIPI .
-elif [ "$INSTALL_TYPE" == "sdist" ]; then
-    # python -m pep517.build
-    python setup_egg.py egg_info  # check egg_info while we're here
-    python setup_egg.py sdist
-    $PIPI dist/*.tar.gz
-elif [ "$INSTALL_TYPE" == "wheel" ]; then
-    pip install wheel
-    python setup_egg.py bdist_wheel
-    $PIPI dist/*.whl
-elif [ "$INSTALL_TYPE" == "requirements" ]; then
-    $PIPI -r requirements.txt
-    python setup.py install
-elif [ "$INSTALL_TYPE" == "conda" ]; then
-    $PIPI .
-fi
+$PIPI .
 
 set +ex

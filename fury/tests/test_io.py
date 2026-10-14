@@ -2,14 +2,10 @@ import os
 from os.path import join as pjoin
 from tempfile import TemporaryDirectory as InTemporaryDirectory
 
-# from PIL import Image
 import numpy as np
 import numpy.testing as npt
-
-# import pytest
 import polyxios as px
 
-# from fury.decorators import skip_osx
 from fury.data import fetch_viz_cubemaps, read_viz_cubemap
 from fury.io import (
     get_extension,
@@ -18,17 +14,12 @@ from fury.io import (
     load_image_as_wgpu_texture_view,
     load_image_texture,
     load_network,
-    # load_polydata,
-    # load_sprite_sheet,
-    # load_text,
     read_lines,
     read_mesh,
     read_points,
     save_image,
     save_network,
 )
-
-# save_polydata,
 from fury.lib import Texture, wgpu
 from fury.testing import assert_greater
 from fury.window import ShowManager
@@ -73,99 +64,6 @@ def test_load_image_as_wgpu_texture_view_uses_show_manager_device():
     assert isinstance(texture_view, wgpu.GPUTextureView)
     npt.assert_array_equal(texture_view.texture.size, (8, 8, 1))
     assert texture_view.texture._device is show_m.device
-
-
-# def test_save_and_load_polydata():
-#     l_ext = ["vtk", "fib", "ply", "xml"]
-#     fname = "temp-io"
-
-#     for ext in l_ext:
-#         with InTemporaryDirectory() as odir:
-#             data = np.random.randint(0, 255, size=(50, 3))
-
-#             pd = PolyData()
-#             pd.SetPoints(numpy_to_vtk_points(data))
-
-#             fname_path = pjoin(odir, "{0}.{1}".format(fname, ext))
-#             save_polydata(pd, fname_path)
-
-#             npt.assert_equal(os.path.isfile(fname_path), True)
-#             assert_greater(os.stat(fname_path).st_size, 0)
-
-#             out_pd = load_polydata(fname_path)
-#             out_data = numpy_support.vtk_to_numpy(out_pd.GetPoints().GetData())
-
-#             npt.assert_array_equal(data, out_data)
-
-#     npt.assert_raises(
-#         IOError,
-#         save_polydata,
-#         PolyData(),
-#         "test.vti",
-#         binary=False,
-#         color_array_name=None,
-#     )
-#     npt.assert_raises(
-#         IOError,
-#         save_polydata,
-#         PolyData(),
-#         "test.obj",
-#         binary=False,
-#         color_array_name=None,
-#     )
-#     npt.assert_raises(IOError, load_polydata, "test.vti")
-#     npt.assert_raises(FileNotFoundError, load_polydata, "does-not-exist.obj")
-
-
-# def test_save_and_load_options():
-#     l_ext = ["ply", "vtk"]
-#     l_options = [
-#         {
-#             "color_array_name": "horizon",
-#         },
-#         {
-#             "binary": True,
-#         },
-#     ]
-#     fname = "temp-io"
-
-#     for ext, option in zip(l_ext, l_options):
-#         with InTemporaryDirectory() as odir:
-#             data = np.random.randint(0, 255, size=(50, 3))
-
-#             pd = PolyData()
-#             pd.SetPoints(numpy_to_vtk_points(data))
-
-#             fname_path = pjoin(odir, "{0}.{1}".format(fname, ext))
-#             save_polydata(pd, fname_path, **option)
-
-#             npt.assert_equal(os.path.isfile(fname_path), True)
-#             assert_greater(os.stat(fname_path).st_size, 0)
-
-#             out_pd = load_polydata(fname_path)
-#             out_data = numpy_support.vtk_to_numpy(out_pd.GetPoints().GetData())
-
-#             npt.assert_array_equal(data, out_data)
-
-#     l_ext = ["vtk", "vtp", "ply", "stl", "mni.obj"]
-#     l_options = [
-#         {},
-#         {
-#             "binary": False,
-#         },
-#     ]
-#     for ext, option in zip(l_ext, l_options):
-#         with InTemporaryDirectory() as odir:
-#             data = np.random.randint(0, 255, size=(50, 3))
-
-#             pd = PolyData()
-#             pd.SetPoints(numpy_to_vtk_points(data))
-
-#             fname_path = pjoin(odir, "{0}.{1}".format(fname, ext))
-#             save_polydata(pd, fname_path, **option)
-
-#             npt.assert_equal(os.path.isfile(fname_path), True)
-#             assert_greater(os.stat(fname_path).st_size, 0)
 
 
 def test_save_and_load_network():
@@ -398,87 +296,3 @@ def test_save_load_image():
         "test.tiff",
         compression_type="invalid",
     )
-
-
-# @pytest.mark.skipif(
-#     skip_osx,
-#     reason="This test does not work on OSX due to "
-#     "libpng version conflict. Need to be "
-#     "introspected on Travis",
-# )
-# def test_pillow():
-#     with InTemporaryDirectory() as odir:
-#         data = (255 * np.random.rand(400, 255, 4)).astype(np.uint8)
-#         fname_path = pjoin(odir, "test.png")
-
-#         for opt1, opt2 in [
-# (True, True), (False, True), (True, False), (False, False)]:
-#             if not opt1:
-#                 with pytest.warns(UserWarning):
-#                     save_image(data, fname_path, use_pillow=opt1)
-#             else:
-#                 save_image(data, fname_path, use_pillow=opt1)
-#             data2 = load_image(fname_path, use_pillow=opt2)
-#             npt.assert_array_almost_equal(data, data2)
-#             npt.assert_equal(data.dtype, data2.dtype)
-
-#         dpi_tolerance = 0.01
-
-#         save_image(data, fname_path, use_pillow=True)
-#         img_dpi = Image.open(fname_path).info.get("dpi")
-#         assert abs(72 - img_dpi[0]) < dpi_tolerance
-#         assert abs(72 - img_dpi[1]) < dpi_tolerance
-
-#         save_image(data, fname_path, use_pillow=True, dpi=300)
-#         img_dpi = Image.open(fname_path).info.get("dpi")
-#         assert abs(300 - img_dpi[0]) < dpi_tolerance
-#         assert abs(300 - img_dpi[1]) < dpi_tolerance
-
-#         save_image(data, fname_path, use_pillow=True, dpi=(45, 45))
-#         img_dpi = Image.open(fname_path).info.get("dpi")
-#         assert abs(45 - img_dpi[0]) < dpi_tolerance
-#         assert abs(45 - img_dpi[1]) < dpi_tolerance
-
-#         save_image(data, fname_path, use_pillow=True, dpi=(300, 72))
-#         img_dpi = Image.open(fname_path).info.get("dpi")
-#         assert abs(300 - img_dpi[0]) < dpi_tolerance
-#         assert abs(72 - img_dpi[1]) < dpi_tolerance
-
-
-# def test_load_sprite_sheet():
-#     sprite_URL = (
-#         "https://raw.githubusercontent.com/"
-#         "fury-gl/fury-data/master/unittests/fury_sprite.png"
-#     )
-
-#     with InTemporaryDirectory() as tdir:
-#         sprites = load_sprite_sheet(sprite_URL, 5, 5)
-
-#         for idx, sprite in enumerate(list(sprites.values())):
-#             img_name = f"{idx}.png"
-#             save_image(sprite, os.path.join(tdir, img_name))
-
-#         sprite_count = len(os.listdir(tdir))
-#         npt.assert_equal(sprite_count, 25)
-
-#         vtktype_sprites = load_sprite_sheet(sprite_URL, 5, 5, as_vtktype=True)
-
-#         for vtk_sprite in list(vtktype_sprites.values()):
-#             npt.assert_equal(isinstance(vtk_sprite, ImageData), True)
-
-
-# def test_load_text():
-#     with InTemporaryDirectory() as tdir:
-#         test_file_name = "test.txt"
-
-#         # Test file does not exist
-#         npt.assert_raises(IOError, load_text, test_file_name)
-
-#         # Saving file with content
-#         test_file_contents = "This is some test text."
-#         test_fname = os.path.join(tdir, test_file_name)
-#         test_file = open(test_fname, "w")
-#         test_file.write(test_file_contents)
-#         test_file.close()
-
-#         npt.assert_string_equal(load_text(test_fname), test_file_contents)

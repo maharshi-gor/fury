@@ -518,8 +518,7 @@ files was silently ignored. This is now corrected:
 
 * ``boys2rgb``: a long-standing bug in the ``z4`` term was corrected
   (``z4 = z2*z2``, not ``z*z2``). (Ref: :ghissue:`857`)
-* ``colormap_lookup_table`` (VTK-based) has been **removed** — it is
-  commented out in the source.
+* ``colormap_lookup_table`` (VTK-based) has been **removed**.
 * ``normalize_colors`` is now a public API and handles hex strings,
   int/float RGB/RGBA, and tiling automatically.
 
@@ -571,9 +570,10 @@ v2.0.0 stabilization):
    * - ``fury.colormap.colormap_lookup_table``
      - VTK LUT removed
    * - ``fury.io.load_polydata``
-     - VTK polydata I/O removed
+     - VTK-object I/O removed; VTK files remain readable with ``read_mesh``,
+       ``read_points``, and ``read_lines``
    * - ``fury.io.save_polydata``
-     - VTK polydata I/O removed
+     - VTK-object I/O removed; use an array-based file writer such as polyxios
    * - ``fury.ui.DrawPanel``
      - Pending UI port
    * - ``fury.ui.FileMenu2D``

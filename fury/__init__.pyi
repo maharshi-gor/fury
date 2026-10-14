@@ -155,7 +155,6 @@ from .colormap import (
     boys2rgb as boys2rgb,
     cc as cc,
     colors_to_uint8 as colors_to_uint8,
-    #     colormap_lookup_table as colormap_lookup_table,
     create_colormap as create_colormap,
     distinguishable_colormap as distinguishable_colormap,
     get_cmap as get_cmap,
@@ -240,13 +239,9 @@ from .deprecator import (
 from .io import (
     load_cube_map_texture as load_cube_map_texture,
     load_image as load_image,
-    # load_polydata as load_polydata,
-    # load_sprite_sheet as load_sprite_sheet,
-    # load_text as load_text,
     save_image as save_image,
 )
 
-# save_polydata as save_polydata,
 # # from .layout import (
 # #     GridLayout as GridLayout,
 # #     HorizontalLayout as HorizontalLayout,
@@ -353,39 +348,10 @@ from .transform import (
 )
 from .ui import (
     UI as UI,
-    #     Button2D as Button2D,
-    #     Card2D as Card2D,
-    #     Checkbox as Checkbox,
-    #     ComboBox2D as ComboBox2D,
     Disk2D as Disk2D,
-    #     DrawPanel as DrawPanel,
-    #     DrawShape as DrawShape,
-    #     FileMenu2D as FileMenu2D,
-    #     GridUI as GridUI,
-    #     ImageContainer2D as ImageContainer2D,
-    #     LineDoubleSlider2D as LineDoubleSlider2D,
-    #     LineSlider2D as LineSlider2D,
-    #     ListBox2D as ListBox2D,
-    #     ListBoxItem2D as ListBoxItem2D,
-    #     Option as Option,
-    #     Panel2D as Panel2D,
-    #     PlaybackPanel as PlaybackPanel,
-    #     RadioButton as RadioButton,
-    #     RangeSlider as RangeSlider,
     Rectangle2D as Rectangle2D,
 )
 
-#     RingSlider2D as RingSlider2D,
-#     SpinBox as SpinBox,
-#     TabPanel2D as TabPanel2D,
-#     TabUI as TabUI,
-#     TextBlock2D as TextBlock2D,
-#     TextBox2D as TextBox2D,
-#     cal_bounding_box_2d as cal_bounding_box_2d,
-#     check_overflow as check_overflow,
-#     clip_overflow as clip_overflow,
-#     rotate_2d as rotate_2d,
-#     wrap_overflow as wrap_overflow,
 from .utils import (
     apply_affine as apply_affine,
     asbytes as asbytes,

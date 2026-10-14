@@ -3,12 +3,10 @@ __all__ = [
     "TabPanel2D",
     "TabUI",
     "ImageContainer2D",
-    #     "GridUI",
     "Rectangle2D",
     "RoundedRectangle2D",
     "Disk2D",
     "TextBlock2D",
-    # "Slider2D",
     "TexturedButton2D",
     "TextButton2D",
     "LineSlider2D",
@@ -17,35 +15,16 @@ __all__ = [
     "RingSlider2D",
     "RangeSlider",
     "Checkbox",
-    #     "Option",
     "RadioButton",
     "ComboBox2D",
     "ListBox2D",
     "ListBoxItem2D",
-    #     "FileMenu2D",
-    #     "DrawShape",
-    #     "DrawPanel",
     "PlaybackPanel",
     "Card2D",
-    #     "SpinBox",
     "UI",
-    #     "cal_bounding_box_2d",
-    #     "check_overflow",
-    #     "clip_overflow",
-    #     "rotate_2d",
-    #     "wrap_overflow",
     "UIContext",
     "Anchor",
 ]
-
-# from . import (
-#     containers as containers,
-#     core as core,
-#     elements as elements,
-#     helpers as helpers,
-# )
-# from .containers import GridUI, ImageContainer2D, Panel2D, TabPanel2D, TabUI
-# from .core import UI, Button2D, Disk2D, Rectangle2D, TextBlock2D
 
 from .containers import ImageContainer2D, Panel2D, TabPanel2D, TabUI
 from .context import UIContext
@@ -66,29 +45,3 @@ from .elements import (
     TextButton2D,
     TexturedButton2D,
 )
-
-# from .elements import (
-#     Checkbox,
-#     ComboBox2D,
-#     DrawPanel,
-#     DrawShape,
-#     FileMenu2D,
-#     LineDoubleSlider2D,
-#     LineSlider2D,
-#     ListBox2D,
-#     ListBoxItem2D,
-#     Option,
-#     PlaybackPanel,
-#     RadioButton,
-#     RangeSlider,
-#     RingSlider2D,
-#     SpinBox,
-#     TextBox2D,
-# )
-# from .helpers import (
-#     cal_bounding_box_2d,
-#     check_overflow,
-#     clip_overflow,
-#     rotate_2d,
-#     wrap_overflow,
-# )
